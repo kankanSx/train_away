@@ -43,8 +43,11 @@ class PantallaResumen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                // "No": cerramos solo el diálogo y seguimos en el resumen.
+                // Cerramos el diálogo de confirmación.
                 Navigator.pop(contextoDialogo);
+
+                // Volvemos a la primera pantalla de reserva.
+                Navigator.popUntil(context, (ruta) => ruta.isFirst);
               },
               child: const Text('No'),
             ),

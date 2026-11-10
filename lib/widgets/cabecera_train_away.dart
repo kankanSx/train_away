@@ -31,15 +31,17 @@ class CabeceraTrainAway extends StatelessWidget implements PreferredSizeWidget {
       // Al ponerlo en false no sale la flecha de "atrás" automática.
       // Para volver atrás el usuario tiene el gesto/botón del sistema.
       automaticallyImplyLeading: false,
+
       title: const Text(
         'Train Away',
         style: TextStyle(
           color: colorLogo,
-          fontSize: 26,
-          fontStyle: FontStyle.italic,
-          fontFamily: 'serif',
+          fontSize: 36,
+          fontFamily: 'Corinthia',
+          fontWeight: FontWeight.w700,
         ),
       ),
+
       // "actions" son los botones que van a la derecha de la barra.
       actions: [
         // Builder nos da un "context" que está DENTRO del Scaffold.
