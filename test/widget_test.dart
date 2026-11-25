@@ -52,4 +52,39 @@ void main() {
     // Seguimos en la misma pantalla.
     expect(find.byType(CheckboxListTile), findsNWidgets(3));
   });
+
+  testWidgets('Volver al formulario con el botón No', (tester) async {
+    await tester.pumpWidget(const TrainAwayApp());
+    await tester.tap(find.text('Con equipaje'));
+    await tester.pump();
+    await tester.tap(find.text('Reservar'));
+    await tester.pumpAndSettle();
+
+    final hoy = DateTime.now().day.toString();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(CalendarDatePicker),
+        matching: find.text(hoy),
+      ),
+    );
+    final horario = find.byType(DropdownButtonFormField<String>);
+    await tester.ensureVisible(horario);
+    await tester.tap(horario);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('10:30').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Reservar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirmar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('No'));
+    await tester.pumpAndSettle();
+
+    final equipaje = find.widgetWithText(CheckboxListTile, 'Con equipaje');
+    expect(tester.widget<CheckboxListTile>(equipaje).value, isTrue);
+    await tester.tap(find.text('Reservar'));
+    await tester.pumpAndSettle();
+    expect(find.text('10:30'), findsOneWidget);
+  });
 }

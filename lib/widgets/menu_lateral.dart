@@ -6,8 +6,10 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../colores.dart';
+import '../models/reserva_model.dart';
 import '../screens/pantalla_formulario.dart';
 
 class MenuLateral extends StatelessWidget {
@@ -33,6 +35,7 @@ class MenuLateral extends StatelessWidget {
             onTap: () {
               // Vamos al formulario y BORRAMOS todas las pantallas anteriores,
               // así el botón "atrás" no vuelve a una reserva a medias.
+              context.read<ReservaModel>().iniciarNuevaReserva();
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
