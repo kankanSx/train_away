@@ -1,9 +1,9 @@
-# Train Away · Skeleton en Flutter
+# Train Away · Estado, navegación y almacenamiento
 
-(Unidad 2 · Actividad 2 de Desarrollo para Dispositivos Móviles)
+(Unidad 3 · Actividad 3 de Desarrollo para Dispositivos Móviles)
 Aplicación de reserva de billetes de tren desarrollada con Flutter y Dart a partir del prototipo de Penpot.
 
-Es una **simulación funcional**: permite completar el proceso de reserva, pero no realiza compras ni guarda reservas en una base de datos.
+La Actividad 3 parte de la aplicación de la Actividad 2. En esta fase se ha incorporado el estado compartido de la reserva en curso. Las siguientes fases integrarán la navegación con go_router y el almacenamiento local.
 
 ## Requisitos y ejecución
 
@@ -46,7 +46,7 @@ La aplicación muestra avisos cuando el origen y el destino coinciden o cuando s
 | `lib/widgets/`                          | Componentes reutilizables: cabecera, menú, botón inferior y etiquetas |
 | `assets/fonts/Corinthia-Bold.ttf`       | Fuente del logotipo «Train Away»                                      |
 
-La información se transfiere entre pantallas mediante el objeto `Reserva` y la navegación se gestiona con `Navigator`. El servicio Mock no accede a una base de datos ni a un servidor externo.
+La reserva en curso se comparte mediante `ReservaModel` y `provider`. Al cancelar la confirmación, se conservan los datos introducidos. La navegación se gestiona con `Navigator`. El servicio simulado proporciona las estaciones, categorías, opciones de viaje y horarios. En la fase de persistencia, SQLite guardará las reservas confirmadas para consultarlas en «Mis reservas». El origen y el destino del último trayecto se recordarán con shared_preferences para rellenar el formulario.
 
 ## Diseño
 
@@ -59,9 +59,9 @@ En el entorno de desarrollo se han realizado estas verificaciones:
 - `flutter pub get`: dependencias resueltas.
 - `flutter run -d chrome`: aplicación ejecutada y revisada manualmente en Chrome.
 - `dart analyze`: sin incidencias.
-- `flutter test`: **2 pruebas superadas**.
+- `flutter test`: **3 pruebas superadas**.
 
-Las pruebas automáticas comprueban la validación de estaciones iguales y el aviso al intentar continuar sin fecha y hora. La navegación del botón **No** y la tipografía del logotipo se han revisado manualmente.
+Las pruebas automáticas comprueban que se rechazan las estaciones iguales, que se pide elegir fecha y hora antes de continuar y que se conservan las elecciones al pulsar **No** en el diálogo. La tipografía del logotipo se revisó manualmente.
 
 ## Orden recomendado para leer el código
 

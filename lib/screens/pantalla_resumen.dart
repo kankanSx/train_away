@@ -9,10 +9,11 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../colores.dart';
 import '../models/opcion_viaje.dart';
-import '../models/reserva.dart';
+import '../models/reserva_model.dart';
 import '../widgets/boton_inferior.dart';
 import '../widgets/cabecera_train_away.dart';
 import '../widgets/etiqueta.dart';
@@ -20,9 +21,7 @@ import '../widgets/menu_lateral.dart';
 import 'pantalla_confirmada.dart';
 
 class PantallaResumen extends StatelessWidget {
-  final Reserva reserva;
-
-  const PantallaResumen({super.key, required this.reserva});
+  const PantallaResumen({super.key});
 
   // Muestra el diálogo de confirmación del diseño.
   void mostrarDialogoConfirmar(BuildContext context) {
@@ -60,7 +59,7 @@ class PantallaResumen extends StatelessWidget {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PantallaConfirmada(reserva: reserva),
+                    builder: (context) => const PantallaConfirmada(),
                   ),
                   (ruta) => false,
                 );
@@ -97,6 +96,8 @@ class PantallaResumen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reserva = context.watch<ReservaModel>().reserva;
+
     return Scaffold(
       appBar: const CabeceraTrainAway(),
       endDrawer: const MenuLateral(),
