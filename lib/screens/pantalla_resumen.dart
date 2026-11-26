@@ -9,6 +9,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../colores.dart';
@@ -18,22 +19,18 @@ import '../widgets/boton_inferior.dart';
 import '../widgets/cabecera_train_away.dart';
 import '../widgets/etiqueta.dart';
 import '../widgets/menu_lateral.dart';
-import 'pantalla_confirmada.dart';
 
 class PantallaResumen extends StatelessWidget {
   const PantallaResumen({super.key});
 
   // Muestra el diálogo de confirmación del diseño.
-  void mostrarDialogoConfirmar(BuildContext context) {
+  Future<void> mostrarDialogoConfirmar(BuildContext context) async {
     // showDialog abre una ventanita encima de la pantalla actual.
-    showDialog(
+    final respuesta = await showDialog<bool>(
       context: context,
       builder: (contextoDialogo) {
         return AlertDialog(
-          title: const Text(
-            'Vas a confirmar tu reserva',
-            textAlign: TextAlign.center,
-          ),
+          title: const Text('Reserva no anulable', textAlign: TextAlign.center),
           content: const Text(
             'Una vez confirmada no podrá ser anulada. ¿Confirmas la reserva?',
             textAlign: TextAlign.center,
@@ -41,35 +38,21 @@ class PantallaResumen extends StatelessWidget {
           actionsAlignment: MainAxisAlignment.spaceEvenly,
           actions: [
             TextButton(
-              onPressed: () {
-                // Cerramos el diálogo de confirmación.
-                Navigator.pop(contextoDialogo);
-
-                // Volvemos a la primera pantalla de reserva.
-                Navigator.popUntil(context, (ruta) => ruta.isFirst);
-              },
+              onPressed: () => Navigator.pop(contextoDialogo, false),
               child: const Text('No'),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.pop(contextoDialogo); // cerramos el diálogo
-                // "Sí": vamos a la pantalla final y quitamos las anteriores
-                // de la pila, para que no se pueda volver atrás a una
-                // reserva que ya está confirmada.
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PantallaConfirmada(),
-                  ),
-                  (ruta) => false,
-                );
-              },
+              onPressed: () => Navigator.pop(contextoDialogo, true),
               child: const Text('Sí'),
             ),
           ],
         );
       },
     );
+
+    // Si se cierra el diálogo con Atrás, el resultado es null.
+    if (!context.mounted || respuesta == null) return;
+    context.go(respuesta ? '/reserva-confirmada' : '/reservar');
   }
 
   // Función auxiliar que dibuja una caja gris con un texto dentro.

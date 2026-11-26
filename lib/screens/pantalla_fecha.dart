@@ -6,6 +6,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../colores.dart';
@@ -15,7 +16,6 @@ import '../widgets/boton_inferior.dart';
 import '../widgets/cabecera_train_away.dart';
 import '../widgets/etiqueta.dart';
 import '../widgets/menu_lateral.dart';
-import 'pantalla_resumen.dart';
 
 class PantallaFecha extends StatelessWidget {
   const PantallaFecha({super.key});
@@ -31,10 +31,7 @@ class PantallaFecha extends StatelessWidget {
     }
 
     // Siguiente pantalla: el resumen.
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const PantallaResumen()),
-    );
+    context.push('/reservar/confirmacion');
   }
 
   @override

@@ -6,6 +6,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../colores.dart';
@@ -14,7 +15,6 @@ import '../models/reserva_model.dart';
 import '../widgets/boton_inferior.dart';
 import '../widgets/cabecera_train_away.dart';
 import '../widgets/menu_lateral.dart';
-import 'pantalla_formulario.dart';
 
 class PantallaConfirmada extends StatelessWidget {
   const PantallaConfirmada({super.key});
@@ -94,6 +94,13 @@ class PantallaConfirmada extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text('¡Te deseamos un excelente viaje!', style: estiloTexto),
+            TextButton(
+              onPressed: () {
+                context.read<ReservaModel>().iniciarNuevaReserva();
+                context.go('/mis-reservas');
+              },
+              child: const Text('Consultar mis reservas'),
+            ),
           ],
         ),
       ),
@@ -103,11 +110,7 @@ class PantallaConfirmada extends StatelessWidget {
         alPulsar: () {
           // Volvemos al formulario vacío para hacer otra reserva.
           context.read<ReservaModel>().iniciarNuevaReserva();
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const PantallaFormulario()),
-            (ruta) => false,
-          );
+          context.go('/reservar');
         },
       ),
     );

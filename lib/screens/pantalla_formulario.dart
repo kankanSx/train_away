@@ -9,6 +9,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../models/categoria.dart';
@@ -20,7 +21,6 @@ import '../widgets/boton_inferior.dart';
 import '../widgets/cabecera_train_away.dart';
 import '../widgets/etiqueta.dart';
 import '../widgets/menu_lateral.dart';
-import 'pantalla_fecha.dart';
 
 class PantallaFormulario extends StatelessWidget {
   const PantallaFormulario({super.key});
@@ -39,10 +39,7 @@ class PantallaFormulario extends StatelessWidget {
       return; // salimos de la función y no navegamos
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const PantallaFecha()),
-    );
+    context.push('/reservar/fecha');
   }
 
   @override

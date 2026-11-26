@@ -16,7 +16,7 @@ import 'package:provider/provider.dart';
 
 import 'colores.dart';
 import 'models/reserva_model.dart';
-import 'screens/pantalla_formulario.dart';
+import 'rutas.dart';
 
 // main() es la primera función que se ejecuta en cualquier programa Dart.
 void main() {
@@ -24,10 +24,22 @@ void main() {
   runApp(const TrainAwayApp());
 }
 
-// Widget raíz de la app. Es "Stateless" (sin estado) porque no cambia nunca:
-// solo configura el aspecto general y la primera pantalla.
-class TrainAwayApp extends StatelessWidget {
+// El router se crea una vez para conservar su pila al redibujar la app.
+class TrainAwayApp extends StatefulWidget {
   const TrainAwayApp({super.key});
+
+  @override
+  State<TrainAwayApp> createState() => _TrainAwayAppState();
+}
+
+class _TrainAwayAppState extends State<TrainAwayApp> {
+  final _router = crearRouter();
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
 
   // build() describe qué hay que dibujar. Flutter lo llama cuando lo necesita.
   @override
@@ -35,7 +47,8 @@ class TrainAwayApp extends StatelessWidget {
     // Colocamos el modelo por encima del navegador para compartirlo.
     return ChangeNotifierProvider(
       create: (context) => ReservaModel(),
-      child: MaterialApp(
+      child: MaterialApp.router(
+        routerConfig: _router,
         title: 'Train Away',
         debugShowCheckedModeBanner: false, // quita la etiqueta "DEBUG"
         // Tema: colores y estilo común para toda la app.
@@ -63,9 +76,6 @@ class TrainAwayApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-
-        // Primera pantalla que se muestra al abrir la app.
-        home: const PantallaFormulario(),
       ),
     );
   }
