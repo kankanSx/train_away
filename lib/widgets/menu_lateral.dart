@@ -6,9 +6,11 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../colores.dart';
-import '../screens/pantalla_formulario.dart';
+import '../models/reserva_model.dart';
 
 class MenuLateral extends StatelessWidget {
   const MenuLateral({super.key});
@@ -31,22 +33,16 @@ class MenuLateral extends StatelessWidget {
             leading: const Icon(Icons.train),
             title: const Text('Nueva reserva'),
             onTap: () {
-              // Vamos al formulario y BORRAMOS todas las pantallas anteriores,
-              // así el botón "atrás" no vuelve a una reserva a medias.
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PantallaFormulario(),
-                ),
-                (ruta) => false, // false = no conservar ninguna pantalla
-              );
+              Scaffold.of(context).closeEndDrawer();
+              context.read<ReservaModel>().iniciarNuevaReserva();
+              context.go('/reservar');
             },
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('Acerca de'),
             onTap: () {
-              Navigator.pop(context); // cierra el menú
+              Scaffold.of(context).closeEndDrawer();
               // Diálogo ya hecho por Flutter con el nombre de la app.
               showAboutDialog(
                 context: context,

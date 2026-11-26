@@ -2,70 +2,43 @@
 // pantalla_fecha.dart  (PANTALLA 2 de 4)
 // -----------------------------------------------------------------------------
 // El usuario elige el día en un calendario y la hora de salida.
-// Recibe la reserva de la pantalla anterior, le añade fecha y hora y la pasa
-// a la pantalla de resumen.
+// La fecha y la hora se guardan en el mismo modelo que usa el formulario.
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../colores.dart';
-import '../models/reserva.dart';
+import '../models/reserva_model.dart';
 import '../services/servicio_datos_mock.dart';
 import '../widgets/boton_inferior.dart';
 import '../widgets/cabecera_train_away.dart';
 import '../widgets/etiqueta.dart';
 import '../widgets/menu_lateral.dart';
-import 'pantalla_resumen.dart';
 
-class PantallaFecha extends StatefulWidget {
-  // La reserva que nos llega desde la pantalla del formulario.
-  final Reserva reserva;
+class PantallaFecha extends StatelessWidget {
+  const PantallaFecha({super.key});
 
-  const PantallaFecha({super.key, required this.reserva});
-
-  @override
-  State<PantallaFecha> createState() => _PantallaFechaState();
-}
-
-class _PantallaFechaState extends State<PantallaFecha> {
-  final ServicioDatosMock servicio = ServicioDatosMock();
-  late List<String> horarios;
-
-  // Al principio no hay nada elegido, por eso pueden ser null ("?").
-  DateTime? fechaElegida;
-  String? horaElegida;
-
-  @override
-  void initState() {
-    super.initState();
-    horarios = servicio.obtenerHorarios();
-  }
-
-  void pulsarReservar() {
+  void pulsarReservar(BuildContext context) {
+    final reserva = context.read<ReservaModel>().reserva;
     // Comprobamos que el usuario haya elegido fecha y hora.
-    if (fechaElegida == null || horaElegida == null) {
+    if (reserva.fecha == null || reserva.hora == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Elige la fecha y la hora de salida')),
       );
       return;
     }
 
-    // Guardamos lo elegido dentro de la reserva.
-    // "widget.reserva" = la reserva que recibió el StatefulWidget de arriba.
-    widget.reserva.fecha = fechaElegida;
-    widget.reserva.hora = horaElegida;
-
     // Siguiente pantalla: el resumen.
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PantallaResumen(reserva: widget.reserva),
-      ),
-    );
+    context.push('/reservar/confirmacion');
   }
 
   @override
   Widget build(BuildContext context) {
+    final reserva = context.watch<ReservaModel>().reserva;
+    final horarios = ServicioDatosMock().obtenerHorarios();
+
     // DateTime.now() = fecha y hora de este momento.
     DateTime hoy = DateTime.now();
 
@@ -87,7 +60,7 @@ class _PantallaFechaState extends State<PantallaFecha> {
               // CalendarDatePicker es un calendario que ya trae Flutter.
               // No hace falta programar la cuadrícula de días a mano.
               child: CalendarDatePicker(
-                initialDate: fechaElegida, // null = ningún día marcado aún
+                initialDate: reserva.fecha, // null = ningún día marcado aún
                 firstDate: hoy, // no se puede elegir un día pasado
                 lastDate: DateTime(
                   hoy.year + 1,
@@ -95,9 +68,7 @@ class _PantallaFechaState extends State<PantallaFecha> {
                   hoy.day,
                 ), // hasta dentro de un año
                 onDateChanged: (dia) {
-                  setState(() {
-                    fechaElegida = dia;
-                  });
+                  context.read<ReservaModel>().cambiarFecha(dia);
                 },
               ),
             ),
@@ -105,16 +76,14 @@ class _PantallaFechaState extends State<PantallaFecha> {
             // ---------------- HORA DE SALIDA ----------------
             const Etiqueta('Horario de salida'),
             DropdownButtonFormField<String>(
-              initialValue: horaElegida,
+              initialValue: reserva.hora,
               hint: const Text('Seleccione la hora de salida'),
               decoration: const InputDecoration(border: OutlineInputBorder()),
               items: horarios.map((hora) {
                 return DropdownMenuItem(value: hora, child: Text(hora));
               }).toList(),
               onChanged: (nuevaHora) {
-                setState(() {
-                  horaElegida = nuevaHora;
-                });
+                context.read<ReservaModel>().cambiarHora(nuevaHora);
               },
             ),
             const SizedBox(height: 20),
@@ -123,7 +92,7 @@ class _PantallaFechaState extends State<PantallaFecha> {
       ),
       bottomNavigationBar: BotonInferior(
         texto: 'Reservar',
-        alPulsar: pulsarReservar,
+        alPulsar: () => pulsarReservar(context),
       ),
     );
   }

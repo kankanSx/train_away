@@ -5,70 +5,31 @@
 // pasajeros, categoría y opciones de viaje. Al pulsar "Reservar" pasamos a la
 // pantalla de fecha y hora.
 //
-// Es un StatefulWidget (CON estado) porque lo que se ve cambia cuando el
-// usuario elige algo en un desplegable o marca una casilla.
+// Las elecciones se guardan en el modelo compartido.
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../models/categoria.dart';
 import '../models/estacion.dart';
 import '../models/opcion_viaje.dart';
-import '../models/reserva.dart';
+import '../models/reserva_model.dart';
 import '../services/servicio_datos_mock.dart';
 import '../widgets/boton_inferior.dart';
 import '../widgets/cabecera_train_away.dart';
 import '../widgets/etiqueta.dart';
 import '../widgets/menu_lateral.dart';
-import 'pantalla_fecha.dart';
 
-// Un StatefulWidget siempre va en DOS clases:
-//   1. El widget en sí (esta), que casi no tiene nada.
-//   2. Su clase "State" (la de abajo), donde están los datos y el build().
-class PantallaFormulario extends StatefulWidget {
+class PantallaFormulario extends StatelessWidget {
   const PantallaFormulario({super.key});
 
-  @override
-  State<PantallaFormulario> createState() => _PantallaFormularioState();
-}
-
-// El "_" delante del nombre hace que la clase sea privada de este fichero.
-class _PantallaFormularioState extends State<PantallaFormulario> {
-  // Pedimos los datos al servicio simulado.
-  final ServicioDatosMock servicio = ServicioDatosMock();
-
-  // Listas que se mostrarán en los desplegables y casillas.
-  // "late" = las rellenamos un poco más tarde, en initState().
-  late List<Estacion> estaciones;
-  late List<Categoria> categorias;
-  late List<OpcionViaje> opciones;
-
-  // Lo que el usuario ha elegido. Son el "estado" de la pantalla.
-  late Estacion origenElegido;
-  late Estacion destinoElegido;
-  late Categoria categoriaElegida;
-  int pasajerosElegidos = 1;
-  List<OpcionViaje> opcionesMarcadas = []; // al principio ninguna marcada
-
-  // initState() se ejecuta UNA vez, cuando la pantalla se crea.
-  // Es el sitio para cargar los datos iniciales.
-  @override
-  void initState() {
-    super.initState();
-    estaciones = servicio.obtenerEstaciones();
-    categorias = servicio.obtenerCategorias();
-    opciones = servicio.obtenerOpcionesViaje();
-
-    // Valores que aparecen elegidos al abrir la pantalla (como en Penpot).
-    origenElegido = estaciones[0];
-    destinoElegido = estaciones[1];
-    categoriaElegida = categorias[0];
-  }
-
   // Se ejecuta al pulsar el botón "Reservar".
-  void pulsarReservar() {
+  void pulsarReservar(BuildContext context) {
+    final reserva = context.read<ReservaModel>().reserva;
     // Evento básico: comprobamos que origen y destino no sean el mismo.
-    if (origenElegido.id == destinoElegido.id) {
+    if (reserva.origen.id == reserva.destino.id) {
       // SnackBar = mensaje que aparece un momento abajo de la pantalla.
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -78,25 +39,18 @@ class _PantallaFormularioState extends State<PantallaFormulario> {
       return; // salimos de la función y no navegamos
     }
 
-    // Creamos la reserva con lo elegido en esta pantalla.
-    Reserva reserva = Reserva(
-      origen: origenElegido,
-      destino: destinoElegido,
-      pasajeros: pasajerosElegidos,
-      categoria: categoriaElegida,
-      opciones: opcionesMarcadas,
-    );
-
-    // NAVEGACIÓN: Navigator.push "apila" una pantalla nueva encima de esta.
-    // Le pasamos la reserva por el constructor de la siguiente pantalla.
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => PantallaFecha(reserva: reserva)),
-    );
+    context.push('/reservar/fecha');
   }
 
   @override
   Widget build(BuildContext context) {
+    // watch actualiza el formulario cada vez que cambia una elección.
+    final reserva = context.watch<ReservaModel>().reserva;
+    final servicio = ServicioDatosMock();
+    final estaciones = servicio.obtenerEstaciones();
+    final categorias = servicio.obtenerCategorias();
+    final opciones = servicio.obtenerOpcionesViaje();
+
     // Scaffold = el "esqueleto" de una pantalla: barra arriba, cuerpo y abajo.
     return Scaffold(
       appBar: const CabeceraTrainAway(),
@@ -113,7 +67,7 @@ class _PantallaFormularioState extends State<PantallaFormulario> {
             // ---------------- ORIGEN ----------------
             const Etiqueta('Origen'),
             DropdownButtonFormField<Estacion>(
-              initialValue: origenElegido,
+              initialValue: reserva.origen,
               decoration: const InputDecoration(border: OutlineInputBorder()),
               // Convertimos cada Estacion de la lista en una opción del menú.
               items: estaciones.map((estacion) {
@@ -124,18 +78,16 @@ class _PantallaFormularioState extends State<PantallaFormulario> {
               }).toList(),
               // onChanged se llama cuando el usuario elige otra opción.
               onChanged: (nuevaEstacion) {
-                // setState() avisa a Flutter de que algo ha cambiado y que
-                // tiene que volver a llamar a build() para redibujar.
-                setState(() {
-                  origenElegido = nuevaEstacion!;
-                });
+                if (nuevaEstacion != null) {
+                  context.read<ReservaModel>().cambiarOrigen(nuevaEstacion);
+                }
               },
             ),
 
             // ---------------- DESTINO ----------------
             const Etiqueta('Destino'),
             DropdownButtonFormField<Estacion>(
-              initialValue: destinoElegido,
+              initialValue: reserva.destino,
               decoration: const InputDecoration(border: OutlineInputBorder()),
               items: estaciones.map((estacion) {
                 return DropdownMenuItem(
@@ -144,9 +96,9 @@ class _PantallaFormularioState extends State<PantallaFormulario> {
                 );
               }).toList(),
               onChanged: (nuevaEstacion) {
-                setState(() {
-                  destinoElegido = nuevaEstacion!;
-                });
+                if (nuevaEstacion != null) {
+                  context.read<ReservaModel>().cambiarDestino(nuevaEstacion);
+                }
               },
             ),
 
@@ -162,7 +114,7 @@ class _PantallaFormularioState extends State<PantallaFormulario> {
                     children: [
                       const Etiqueta('Pasajeros'),
                       DropdownButtonFormField<int>(
-                        initialValue: pasajerosElegidos,
+                        initialValue: reserva.pasajeros,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                         ),
@@ -175,9 +127,11 @@ class _PantallaFormularioState extends State<PantallaFormulario> {
                             ),
                         ],
                         onChanged: (nuevoNumero) {
-                          setState(() {
-                            pasajerosElegidos = nuevoNumero!;
-                          });
+                          if (nuevoNumero != null) {
+                            context.read<ReservaModel>().cambiarPasajeros(
+                              nuevoNumero,
+                            );
+                          }
                         },
                       ),
                     ],
@@ -190,7 +144,7 @@ class _PantallaFormularioState extends State<PantallaFormulario> {
                     children: [
                       const Etiqueta('Categoría'),
                       DropdownButtonFormField<Categoria>(
-                        initialValue: categoriaElegida,
+                        initialValue: reserva.categoria,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                         ),
@@ -201,9 +155,11 @@ class _PantallaFormularioState extends State<PantallaFormulario> {
                           );
                         }).toList(),
                         onChanged: (nuevaCategoria) {
-                          setState(() {
-                            categoriaElegida = nuevaCategoria!;
-                          });
+                          if (nuevaCategoria != null) {
+                            context.read<ReservaModel>().cambiarCategoria(
+                              nuevaCategoria,
+                            );
+                          }
                         },
                       ),
                     ],
@@ -220,19 +176,16 @@ class _PantallaFormularioState extends State<PantallaFormulario> {
               CheckboxListTile(
                 title: Text(opcion.nombre),
                 // ¿Está marcada? Sí, si está dentro de la lista de marcadas.
-                value: opcionesMarcadas.contains(opcion),
+                value: reserva.opciones.contains(opcion),
                 controlAffinity:
                     ListTileControlAffinity.leading, // casilla a la izquierda
                 contentPadding: EdgeInsets.zero,
                 dense: true,
                 onChanged: (marcada) {
-                  setState(() {
-                    if (marcada == true) {
-                      opcionesMarcadas.add(opcion);
-                    } else {
-                      opcionesMarcadas.remove(opcion);
-                    }
-                  });
+                  context.read<ReservaModel>().cambiarOpcion(
+                    opcion,
+                    marcada == true,
+                  );
                 },
               ),
           ],
@@ -240,7 +193,7 @@ class _PantallaFormularioState extends State<PantallaFormulario> {
       ),
       bottomNavigationBar: BotonInferior(
         texto: 'Reservar',
-        alPulsar: pulsarReservar, // le pasamos la función (sin paréntesis)
+        alPulsar: () => pulsarReservar(context),
       ),
     );
   }

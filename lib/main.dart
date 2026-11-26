@@ -12,8 +12,11 @@ import 'package:flutter/material.dart';
 // de los meses del calendario). Sin él, el calendario saldría en inglés.
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'package:provider/provider.dart';
+
 import 'colores.dart';
-import 'screens/pantalla_formulario.dart';
+import 'models/reserva_model.dart';
+import 'rutas.dart';
 
 // main() es la primera función que se ejecuta en cualquier programa Dart.
 void main() {
@@ -21,45 +24,59 @@ void main() {
   runApp(const TrainAwayApp());
 }
 
-// Widget raíz de la app. Es "Stateless" (sin estado) porque no cambia nunca:
-// solo configura el aspecto general y la primera pantalla.
-class TrainAwayApp extends StatelessWidget {
+// El router se crea una vez para conservar su pila al redibujar la app.
+class TrainAwayApp extends StatefulWidget {
   const TrainAwayApp({super.key});
+
+  @override
+  State<TrainAwayApp> createState() => _TrainAwayAppState();
+}
+
+class _TrainAwayAppState extends State<TrainAwayApp> {
+  final _router = crearRouter();
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
 
   // build() describe qué hay que dibujar. Flutter lo llama cuando lo necesita.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Train Away',
-      debugShowCheckedModeBanner: false, // quita la etiqueta "DEBUG"
-      // Tema: colores y estilo común para toda la app.
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: colorPrincipal),
-        scaffoldBackgroundColor: Colors.white,
-        // Todos los ElevatedButton de la app tendrán este estilo.
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colorPrincipal,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(140, 44),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+    // Colocamos el modelo por encima del navegador para compartirlo.
+    return ChangeNotifierProvider(
+      create: (context) => ReservaModel(),
+      child: MaterialApp.router(
+        routerConfig: _router,
+        title: 'Train Away',
+        debugShowCheckedModeBanner: false, // quita la etiqueta "DEBUG"
+        // Tema: colores y estilo común para toda la app.
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: colorPrincipal),
+          scaffoldBackgroundColor: Colors.white,
+          // Todos los ElevatedButton de la app tendrán este estilo.
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorPrincipal,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(140, 44),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
         ),
+
+        // Idioma: español de España.
+        locale: const Locale('es', 'ES'),
+        supportedLocales: const [Locale('es', 'ES')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
       ),
-
-      // Idioma: español de España.
-      locale: const Locale('es', 'ES'),
-      supportedLocales: const [Locale('es', 'ES')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-
-      // Primera pantalla que se muestra al abrir la app.
-      home: const PantallaFormulario(),
     );
   }
 }

@@ -6,22 +6,23 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../colores.dart';
 import '../models/opcion_viaje.dart';
-import '../models/reserva.dart';
+import '../models/reserva_model.dart';
 import '../widgets/boton_inferior.dart';
 import '../widgets/cabecera_train_away.dart';
 import '../widgets/menu_lateral.dart';
-import 'pantalla_formulario.dart';
 
 class PantallaConfirmada extends StatelessWidget {
-  final Reserva reserva;
-
-  const PantallaConfirmada({super.key, required this.reserva});
+  const PantallaConfirmada({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final reserva = context.watch<ReservaModel>().reserva;
+
     // Estilo de texto que usamos varias veces en esta pantalla.
     const TextStyle estiloTexto = TextStyle(
       fontWeight: FontWeight.bold,
@@ -93,6 +94,13 @@ class PantallaConfirmada extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text('¡Te deseamos un excelente viaje!', style: estiloTexto),
+            TextButton(
+              onPressed: () {
+                context.read<ReservaModel>().iniciarNuevaReserva();
+                context.go('/mis-reservas');
+              },
+              child: const Text('Consultar mis reservas'),
+            ),
           ],
         ),
       ),
@@ -101,11 +109,8 @@ class PantallaConfirmada extends StatelessWidget {
         relleno: false, // en el diseño este botón solo tiene borde
         alPulsar: () {
           // Volvemos al formulario vacío para hacer otra reserva.
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const PantallaFormulario()),
-            (ruta) => false,
-          );
+          context.read<ReservaModel>().iniciarNuevaReserva();
+          context.go('/reservar');
         },
       ),
     );

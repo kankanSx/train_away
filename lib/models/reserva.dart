@@ -1,13 +1,8 @@
 // =============================================================================
 // reserva.dart  (MODELO)
 // -----------------------------------------------------------------------------
-// Guarda todos los datos que el usuario va eligiendo mientras pasa por las
-// pantallas. Creamos UNA reserva en la primera pantalla y la vamos pasando
-// de pantalla en pantalla, rellenando lo que falta.
-//
-//   Formulario  ->  rellena origen, destino, pasajeros, categoría y opciones
-//   Fecha       ->  rellena fecha y hora
-//   Resumen     ->  solo la lee para mostrarla
+// Representa los datos del viaje. ReservaModel se encarga de compartirlos
+// entre las pantallas y avisar cuando cambia una elección.
 // =============================================================================
 
 import 'categoria.dart';
